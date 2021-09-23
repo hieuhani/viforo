@@ -23,7 +23,7 @@ export class AuthService {
     private readonly encryptionService: EncryptionService,
   ) {}
 
-  generateToken(payload: { userId: number }): Token {
+  generateToken(payload: { accountId: string }): Token {
     const accessToken = this.jwtService.sign(payload);
 
     const securityConfig = this.configService.get<SecurityConfig>('security');
@@ -39,25 +39,25 @@ export class AuthService {
 
   refreshToken(token: string): Token {
     try {
-      const { userId } = this.jwtService.verify(token);
+      const { accountId } = this.jwtService.verify(token);
 
       return this.generateToken({
-        userId,
+        accountId,
       });
     } catch (e) {
       throw new UnauthorizedException();
     }
   }
 
-  async login(email: string, password: string): Promise<Token> {
-    const user = await this.prisma.user.findUnique({ where: { email } });
+  async login(username: string, password: string): Promise<Token> {
+    const account = await this.prisma.account.findUnique({ where: { username } });
 
-    if (!user) {
-      throw new NotFoundException(`No user found for email: ${email}`);
+    if (!account) {
+      throw new NotFoundException(`No account found for username: ${username}`);
     }
     const passwordValid = await this.encryptionService.validateHash(
       password,
-      user.password,
+      account.password,
     );
 
     if (!passwordValid) {
@@ -65,7 +65,7 @@ export class AuthService {
     }
 
     return this.generateToken({
-      userId: user.id,
+      accountId: account.id,
     });
   }
 
@@ -74,7 +74,7 @@ export class AuthService {
 
     const user = await this.userService.createUser(input);
     return this.generateToken({
-      userId: user.id,
+      accountId: user.id,
     });
   }
 }

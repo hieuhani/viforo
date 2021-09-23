@@ -12,12 +12,14 @@ generator client {
 
 // Prepare for user service
 model Account {
-  id        String  @id @default(uuid()) @db.Uuid
-  username  String  @unique
-  firstName String
-  lastName  String?
-  password  String
-  avatar    String?
+  id            String  @id @default(uuid()) @db.Uuid
+  username      String  @unique
+  email         String  @unique
+  emailVerified Boolean @default(false)
+  firstName     String
+  lastName      String?
+  password      String
+  avatar        String?
 }
 
 model User {
