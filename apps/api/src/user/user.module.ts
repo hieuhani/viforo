@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
-import { EncryptionModule } from '../encryption/encryption.module';
+import { AccountService } from '../account/account.service';
 import { UserResolver } from './user.resolver';
 import { UserService } from './user.service';
 
 @Module({
-  imports: [EncryptionModule],
-  providers: [UserResolver, UserService],
+  providers: [UserResolver, UserService, AccountService],
   exports: [UserService],
 })
 export class UserModule {}

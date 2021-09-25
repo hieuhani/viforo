@@ -9,6 +9,7 @@ import securityConfig from './config/security.config';
 import { PrismaModule } from './prisma/prisma.module';
 import { EncryptionModule } from './encryption/encryption.module';
 import databaseConfig from './config/database.config';
+import { AccountModule } from './account/account.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import databaseConfig from './config/database.config';
     EncryptionModule,
     UserModule,
     AuthModule,
+    AccountModule,
   ],
   controllers: [],
   providers: [DateScalar],

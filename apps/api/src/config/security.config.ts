@@ -10,9 +10,9 @@ export interface SecurityConfig {
 export default registerAs(
   'security',
   (): SecurityConfig => ({
-    expiresIn: '2m',
+    expiresIn: '15m',
     refreshIn: '7d',
     bcryptSaltOrRound: 10,
-    jwtSecret: 'Fu2020ck',
+    jwtSecret: 'Fu2021ck',
   }),
 );

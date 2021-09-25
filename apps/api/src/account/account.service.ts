@@ -1,17 +1,17 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { User } from '@prisma/client'
+import { Account } from '@prisma/client'
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
-export class UserService {
+export class AccountService {
   constructor(
     @Inject(PrismaService) private readonly prisma: PrismaService,
   ) {}
 
-  async getUserByAccountId(accountId: string): Promise<User> {
-    return this.prisma.user.findUnique({
+  async getAccount(accountId: string): Promise<Account> {
+    return this.prisma.account.findUnique({
       where: {
-        accountId,
+        id: accountId,
       }
     });
   }

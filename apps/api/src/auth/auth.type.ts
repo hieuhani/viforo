@@ -20,6 +20,10 @@ export class Token {
 @InputType()
 export class SignUpInput {
   @Field()
+  @IsDefined()
+  username: string;
+
+  @Field()
   @IsEmail()
   @IsDefined()
   email: string;
@@ -42,9 +46,8 @@ export class SignUpInput {
 @InputType()
 export class LoginInput {
   @Field()
-  @IsEmail()
   @IsDefined()
-  email: string;
+  username: string;
 
   @Field()
   @IsNotEmpty()
@@ -60,4 +63,10 @@ export class Auth extends Token {
 
 export interface JwtDto {
   userId: number;
+}
+
+export type JwtPayload = {
+  sub: string
+  iat: number
+  exp: number
 }

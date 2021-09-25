@@ -3,16 +3,14 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { Test, TestingModule } from '@nestjs/testing';
-import { PrismaClient } from '@upbuilder/prisma';
+import { PrismaClient } from '@prisma/client';
 import { mockDeep } from 'jest-mock-extended';
-import securityConfig from 'src/config/security.config';
-import { EncryptionModule } from 'src/encryption/encryption.module';
-import { EncryptionService } from 'src/encryption/encryption.service';
-import { PrismaModule } from 'src/prisma/prisma.module';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { prismaUserFactory } from 'src/test/prisma/user.factory';
-import { UserModule } from 'src/user/user.module';
-import { UserService } from 'src/user/user.service';
+import securityConfig from '../../config/security.config';
+import { EncryptionModule } from '../../encryption/encryption.module';
+import { EncryptionService } from '../../encryption/encryption.service';
+import { PrismaService } from '../../prisma/prisma.service';
+import { prismaAccountFactory } from '../../test/prisma/account.factory';
+import { UserService } from '../../user/user.service';
 import { AuthService } from '../auth.service';
 
 describe('AuthService', () => {
@@ -58,38 +56,38 @@ describe('AuthService', () => {
   });
 
   it('#generateToken should generated a token object', () => {
-    const token = service.generateToken({ userId: 1 });
+    const token = service.generateToken({ sub: 'useriduuid' });
     expect(token.accessToken).toBeDefined();
     expect(token.refreshToken).toBeDefined();
     expect(token.accessToken).not.toEqual(token.refreshToken);
   });
 
   describe('#login', () => {
-    it('login with correct email and password', async () => {
+    it('login with correct username and password', async () => {
       const password = 'password';
-      const user = prismaUserFactory.createUser({
+      const user = prismaAccountFactory.createAccount({
         password: await encryptionService.hash(password),
       });
 
-      (prismaService.user.findUnique as jest.Mock).mockResolvedValue(user);
+      (prismaService.account.findUnique as jest.Mock).mockResolvedValue(user);
 
-      const token = await service.login(user.email, password);
+      const token = await service.login(user.username, password);
       expect(token.accessToken).toBeDefined();
       expect(token.refreshToken).toBeDefined();
       expect(token.accessToken).not.toEqual(token.refreshToken);
     });
 
-    it('login with not found email should raise an exception', async () => {
-      const user = prismaUserFactory.createUser();
+    it('login with not found username should raise an exception', async () => {
+      const user = prismaAccountFactory.createAccount();
       const password = 'password';
-      (prismaService.user.findUnique as jest.Mock).mockResolvedValue(null);
+      (prismaService.account.findUnique as jest.Mock).mockResolvedValue(null);
 
       try {
-        await service.login(user.email, password);
+        await service.login(user.username, password);
       } catch (e) {
         expect(e).toBeInstanceOf(NotFoundException);
         expect(e).toEqual(
-          new NotFoundException(`No user found for email: ${user.email}`),
+          new NotFoundException(`No account found for username: ${user.username}`),
         );
       }
     });
@@ -97,7 +95,7 @@ describe('AuthService', () => {
 
   describe('#refreshToken', () => {
     it('refresh token with a valid refresh token', () => {
-      const token = service.generateToken({ userId: 1 });
+      const token = service.generateToken({ sub: 'useriduuid' });
       expect(service.refreshToken(token.refreshToken)).toBeDefined();
     });
 
