@@ -1,0 +1,67 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Account {
+  avatar: String
+  email: String!
+  emailVerified: Boolean!
+  firstName: String!
+  id: ID!
+  lastName: String
+  username: String!
+}
+
+type Auth {
+  """JWT access token"""
+  accessToken: String!
+
+  """JWT refresh token"""
+  refreshToken: String!
+}
+
+"""Date custom scalar type"""
+scalar Date
+
+input LoginInput {
+  password: String!
+  username: String!
+}
+
+type Mutation {
+  refreshToken(token: String!): Token!
+  signIn(input: LoginInput!): Auth!
+  signUp(input: SignUpInput!): Auth!
+}
+
+type Query {
+  me: User!
+}
+
+input SignUpInput {
+  email: String!
+  firstName: String!
+  lastName: String
+  password: String!
+  username: String!
+}
+
+type Token {
+  """JWT access token"""
+  accessToken: String!
+
+  """JWT refresh token"""
+  refreshToken: String!
+}
+
+type User {
+  account: Account!
+  accountId: String!
+
+  """Identifies the date and time when the object was created."""
+  createdAt: Date!
+  id: ID!
+
+  """Identifies the date and time when the object was last updated."""
+  updatedAt: Date!
+}
