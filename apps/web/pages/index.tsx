@@ -1,10 +1,11 @@
-export function Index() {
+import { LayoutHome } from 'layouts/home/LayoutHome';
 
+export default function Index() {
   return (
-    <div>
-      Hello world
-    </div>
+    <LayoutHome
+      leftBar={<div>1</div>}
+      main={<div>2</div>}
+      rightBar={<div>3</div>}
+    />
   );
 }
-
-export default Index;
