@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { FormControl } from 'components/FormControl';
 import { useForm, SubmitHandler, useFormState } from 'react-hook-form';
 import { useMutation } from 'urql';
+import { withUrql } from '../../libs/urql-client';
 
 type SignUpFormData = {
   username: string;
@@ -157,4 +158,4 @@ const SignUp: React.FunctionComponent = () => {
   );
 };
 
-export default SignUp;
+export default withUrql(SignUp);
