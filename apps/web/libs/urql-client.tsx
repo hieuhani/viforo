@@ -83,6 +83,16 @@ const getAuth = async ({
 
 const isServerSide = typeof window === 'undefined';
 
+export const urqlClient = createClient({
+  url: 'http://localhost:3000/graphql',
+  exchanges: [
+    dedupExchange,
+    cacheExchange,
+    isServerSide ? undefined : authExchange({ addAuthToOperation, getAuth }),
+    fetchExchange,
+  ].filter(Boolean),
+});
+
 export function withUrql<T>(Component: ComponentType<T>) {
   return withUrqlClient((ssrExchange) => ({
     url: 'http://localhost:3000/graphql',
