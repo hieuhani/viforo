@@ -8,18 +8,20 @@ import {
 import { authExchange } from '@urql/exchange-auth';
 import { withUrqlClient } from 'next-urql';
 import { ComponentType } from 'react';
+import {
+  AuthState,
+  clearAuthState,
+  getAuthState,
+  updateAuthState,
+} from 'services/auth';
 
-type AuthState = {
-  accessToken: string;
-  refreshToken: string;
-};
 type GetAuthParams = {
   authState: AuthState;
   mutate: any;
 };
 
 const addAuthToOperation = ({ authState, operation }) => {
-  if (!authState || !authState.token) {
+  if (!authState || !authState.accessToken) {
     return operation;
   }
 
@@ -34,7 +36,7 @@ const addAuthToOperation = ({ authState, operation }) => {
       ...fetchOptions,
       headers: {
         ...fetchOptions.headers,
-        Authorization: authState.token,
+        Authorization: `Bearer ${authState.accessToken}`,
       },
     },
   });
@@ -44,48 +46,42 @@ const getAuth = async ({
   authState,
   mutate,
 }: GetAuthParams): Promise<AuthState | null> => {
-  console.log(authState);
-  // if (!authState) {
-  //   const accessToken = localStorage.getItem('accessToken');
-  //   const refreshToken = localStorage.getItem('refreshToken');
-  //   if (accessToken && refreshToken) {
-  //     return { accessToken, refreshToken };
-  //   }
-  //   return null;
-  // }
+  if (!authState) {
+    return getAuthState();
+  }
 
-  // const result = await mutate(
-  //   `
-  //   mutation RefreshToken($token: String!) {
-  //     refreshToken(token: $token) {
-  //       accessToken
-  //       refreshToken
-  //     }
-  //   }`,
-  //   {
-  //     token: authState!.refreshToken,
-  //   }
-  // );
+  const result = await mutate(
+    `
+    mutation RefreshToken($token: String!) {
+      refreshToken(token: $token) {
+        accessToken
+        refreshToken
+      }
+    }`,
+    {
+      token: authState!.refreshToken,
+    }
+  );
 
-  // if (result.data?.refreshLogin) {
-  //   localStorage.setItem('token', result.data.refreshLogin.token);
-  //   localStorage.setItem('refreshToken', result.data.refreshLogin.refreshToken);
+  if (result.data?.refreshLogin) {
+    updateAuthState(
+      result.data.refreshToken.accessToken,
+      result.data.refreshToken.refreshToken
+    );
 
-  //   return {
-  //     accessToken: result.data.refreshLogin.accessToken,
-  //     refreshToken: result.data.refreshLogin.refreshToken,
-  //   };
-  // }
+    return {
+      accessToken: result.data.refreshToken.accessToken,
+      refreshToken: result.data.refreshToken.refreshToken,
+    };
+  }
 
-  // This is where auth has gone wrong and we need to clean up and redirect to a login page
-  // localStorage.clear();
-  // redirect to sign in page
+  clearAuthState();
   // logout();
 
   return null;
 };
 
-// authExchange({ addAuthToOperation, getAuth }),
+const isServerSide = typeof window === 'undefined';
 
 export function withUrql<T>(Component: ComponentType<T>) {
   return withUrqlClient((ssrExchange) => ({
@@ -93,9 +89,9 @@ export function withUrql<T>(Component: ComponentType<T>) {
     exchanges: [
       dedupExchange,
       cacheExchange,
-      authExchange({ addAuthToOperation, getAuth }),
+      isServerSide ? undefined : authExchange({ addAuthToOperation, getAuth }),
       ssrExchange,
       fetchExchange,
-    ],
+    ].filter(Boolean),
   }))(Component);
 }
