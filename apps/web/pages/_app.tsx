@@ -3,6 +3,7 @@ import { AppProps } from 'next/app';
 import { useRouter } from 'next/router';
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
+import { AuthProvider } from 'services/auth';
 import '../styles.css';
 
 const LayoutAdmin = dynamic(() => import('layouts/admin/LayoutAdmin'), {
@@ -24,11 +25,11 @@ export default function App({ Component, pageProps }: AppProps) {
     </>
   );
   return (
-    <>
+    <AuthProvider>
       <Head>
         <title>Welcome to web!</title>
       </Head>
       {node}
-    </>
+    </AuthProvider>
   );
 }

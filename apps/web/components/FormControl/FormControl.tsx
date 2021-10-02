@@ -1,11 +1,12 @@
 import { InputHTMLAttributes, forwardRef } from 'react';
-
+import cs from 'classnames';
 interface Props extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   name: string;
+  error?: string;
 }
 export const FormControl = forwardRef<HTMLInputElement, Props>(
-  ({ label, ...props }, ref) => (
+  ({ label, error, ...props }, ref) => (
     <div>
       {label && (
         <label
@@ -18,9 +19,15 @@ export const FormControl = forwardRef<HTMLInputElement, Props>(
       <input
         ref={ref}
         id={props.name}
-        className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+        className={cs(
+          'appearance-none block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none sm:text-sm',
+          error
+            ? 'border-red-300 text-red-900 placeholder-red-300 focus:outline-none focus:ring-red-500 focus:border-red-500'
+            : 'border-gray-300 placeholder-gray-400 focus:ring-indigo-500 focus:border-indigo-500'
+        )}
         {...props}
       />
+      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
     </div>
   )
 );

@@ -1,5 +1,5 @@
 import { Resolver, Query, ResolveField, Parent } from '@nestjs/graphql';
-import {  UseGuards } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
 import { User } from './user.type';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { GqlAuthGuard } from '../auth/gql-auth.guard';
@@ -9,9 +9,7 @@ import { Account } from '../account/account.type';
 @Resolver((of) => User)
 @UseGuards(GqlAuthGuard)
 export class UserResolver {
-  constructor(private readonly accountService: AccountService) {
-
-  }
+  constructor(private readonly accountService: AccountService) {}
 
   @Query((returns) => User)
   async me(@CurrentUser() user: User): Promise<User> {
@@ -28,6 +26,6 @@ export class UserResolver {
       emailVerified: account.emailVerified,
       firstName: account.firstName,
       lastName: account.lastName,
-    }
+    };
   }
 }

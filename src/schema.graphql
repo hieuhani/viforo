@@ -7,6 +7,7 @@ type Account {
   email: String!
   emailVerified: Boolean!
   firstName: String!
+  fullName: String!
   id: ID!
   lastName: String
   username: String!
