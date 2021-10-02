@@ -46,8 +46,13 @@ const getAuth = async ({
   authState,
   mutate,
 }: GetAuthParams): Promise<AuthState | null> => {
-  if (!authState) {
-    return getAuthState();
+  const token = getAuthState();
+  console.log(token);
+  if (!token) {
+    return null;
+  }
+  if (!authState && token.accessToken) {
+    return token;
   }
 
   const result = await mutate(
@@ -59,11 +64,11 @@ const getAuth = async ({
       }
     }`,
     {
-      token: authState!.refreshToken,
+      token: token.refreshToken,
     }
   );
 
-  if (result.data?.refreshLogin) {
+  if (result.data?.refreshToken) {
     updateAuthState(
       result.data.refreshToken.accessToken,
       result.data.refreshToken.refreshToken
