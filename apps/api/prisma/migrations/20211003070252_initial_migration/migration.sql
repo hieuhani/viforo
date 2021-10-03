@@ -28,10 +28,9 @@ CREATE TABLE "User" (
 CREATE TABLE "Group" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
-    "type" TEXT,
     "color" TEXT,
     "icon" TEXT,
-    "default" INTEGER DEFAULT 0,
+    "default" BOOLEAN DEFAULT false,
 
     CONSTRAINT "Group_pkey" PRIMARY KEY ("id")
 );
@@ -39,7 +38,7 @@ CREATE TABLE "Group" (
 -- CreateTable
 CREATE TABLE "GroupPermission" (
     "id" SERIAL NOT NULL,
-    "nampermissione" TEXT NOT NULL,
+    "permission" TEXT NOT NULL,
     "groupId" INTEGER NOT NULL,
 
     CONSTRAINT "GroupPermission_pkey" PRIMARY KEY ("id")
