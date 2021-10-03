@@ -12,16 +12,16 @@ generator client {
 
 // Prepare for user service
 model Account {
-  id            String  @id @default(uuid()) @db.Uuid
-  username      String  @unique
-  email         String  @unique
-  emailVerified Boolean @default(false)
+  id            String   @id @default(uuid()) @db.Uuid
+  username      String   @unique
+  email         String   @unique
+  emailVerified Boolean  @default(false)
   firstName     String
   lastName      String?
   password      String
   avatar        String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model User {
@@ -38,19 +38,18 @@ model User {
 model Group {
   id          Int               @id @default(autoincrement())
   name        String
-  type        String?
   color       String?
   icon        String?
-  default     Int?              @default(0)
+  default     Boolean?          @default(false)
   users       GroupUser[]
   permissions GroupPermission[]
 }
 
 model GroupPermission {
-  id             Int    @id @default(autoincrement())
-  group          Group  @relation(fields: [groupId], references: [id])
-  nampermissione String
-  groupId        Int
+  id         Int    @id @default(autoincrement())
+  group      Group  @relation(fields: [groupId], references: [id])
+  permission String
+  groupId    Int
 }
 
 model GroupUser {
