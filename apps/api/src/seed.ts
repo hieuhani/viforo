@@ -53,7 +53,7 @@ async function bootstrap() {
     prismaService.account.create({
       data: {
         id: accountId,
-        username: 'hieuhani',
+        username: 'admin',
         email: 'hieutran.fu@gmail.com',
         firstName: 'Hieu',
         lastName: 'Tran',
