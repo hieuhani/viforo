@@ -47,7 +47,6 @@ const getAuth = async ({
   mutate,
 }: GetAuthParams): Promise<AuthState | null> => {
   const token = getAuthState();
-  console.log(token);
   if (!token) {
     return null;
   }

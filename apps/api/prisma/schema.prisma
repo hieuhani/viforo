@@ -27,7 +27,7 @@ model Account {
 model User {
   id          Int          @id @default(autoincrement())
   accountId   String       @unique
-  groups      GroupUser[]
+  groupUsers  GroupUser[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   threads     Thread[]
@@ -41,7 +41,7 @@ model Group {
   color       String?
   icon        String?
   default     Boolean?          @default(false)
-  users       GroupUser[]
+  groupUsers  GroupUser[]
   permissions GroupPermission[]
 }
 
