@@ -1,17 +1,20 @@
 import { Resolver, Query, ResolveField, Parent } from '@nestjs/graphql';
-import { UseGuards } from '@nestjs/common';
+import { forwardRef, Inject, UseGuards } from '@nestjs/common';
 import { User } from './user.type';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { GqlAuthGuard } from '../auth/gql-auth.guard';
 import { AccountService } from '../account/account.service';
 import { Account } from '../account/account.type';
 
-@Resolver((of) => User)
+@Resolver(() => User)
 @UseGuards(GqlAuthGuard)
 export class UserResolver {
-  constructor(private readonly accountService: AccountService) {}
+  constructor(
+    @Inject(forwardRef(() => AccountService))
+    private readonly accountService: AccountService
+  ) {}
 
-  @Query((returns) => User)
+  @Query(() => User)
   async me(@CurrentUser() user: User): Promise<User> {
     return user;
   }

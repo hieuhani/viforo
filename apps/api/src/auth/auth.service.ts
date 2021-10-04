@@ -1,27 +1,29 @@
-import { v4 } from 'uuid'
+import { v4 } from 'uuid';
 import {
   BadRequestException,
-  Inject,
   Injectable,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import get from 'lodash.get'
+import get from 'lodash.get';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { SecurityConfig } from '../config/security.config';
 import { EncryptionService } from '../encryption/encryption.service';
-import { PrismaService } from '../prisma/prisma.service';
 import { SignUpInput, Token } from './auth.type';
 import { Prisma } from '@prisma/client';
+import { AccountService } from '../account/account.service';
+import { EntityManager, MikroORM } from '@mikro-orm/core';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
-    @Inject(PrismaService) private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
     private readonly encryptionService: EncryptionService,
+    private readonly accountService: AccountService,
+    private readonly orm: MikroORM,
+    private readonly em: EntityManager
   ) {}
 
   generateToken(payload: { sub: string }): Token {
@@ -52,14 +54,14 @@ export class AuthService {
   }
 
   async login(username: string, password: string): Promise<Token> {
-    const account = await this.prisma.account.findUnique({ where: { username } });
+    const account = await this.accountService.getAccountByUsername(username);
 
     if (!account) {
       throw new NotFoundException(`No account found for username: ${username}`);
     }
     const passwordValid = await this.encryptionService.validateHash(
       password,
-      account.password,
+      account.password
     );
 
     if (!passwordValid) {
@@ -75,30 +77,25 @@ export class AuthService {
     input.email = input.email.toLowerCase();
 
     const hashedPassword = await this.encryptionService.hash(input.password);
-    const accountId = v4()
+    const accountId = v4();
 
     try {
-      await this.prisma.$transaction([
-        this.prisma.account.create({
-          data: {
-            id: accountId,
-            username: input.username,
-            email: input.email,
-            firstName: input.firstName,
-            lastName: input.lastName,
-            password: hashedPassword,
-          },
-        }),
-        this.prisma.user.create({
-          data: {
-            accountId,
-          }
-        })
-      ])
-    } catch(e) {
+      await this.accountService.create({
+        id: accountId,
+        username: input.username,
+        email: input.email,
+        firstName: input.firstName,
+        lastName: input.lastName,
+        password: hashedPassword,
+      });
+
+      // await this.userService.create({
+      //   accountId,
+      // });
+    } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
         if (e.code === 'P2002') {
-          const property = get(e, 'meta.target[0]')
+          const property = get(e, 'meta.target[0]');
           throw new BadRequestException(`${property} is existed`);
         }
       }

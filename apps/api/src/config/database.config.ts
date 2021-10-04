@@ -1,12 +1,18 @@
 import { registerAs } from '@nestjs/config';
 
 export interface DatabaseConfig {
-  url: string;
+  type: 'postgresql' | 'mysql';
+  dbName: string;
+  port: number;
+  user: string;
 }
 
 export default registerAs(
   'database',
   (): DatabaseConfig => ({
-    url: 'postgresql://viforo@localhost:5432/viforo?schema=public',
-  }),
+    type: 'postgresql',
+    dbName: 'viforo',
+    port: 5432,
+    user: 'viforo',
+  })
 );

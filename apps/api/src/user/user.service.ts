@@ -1,19 +1,19 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { EntityData } from '@mikro-orm/core';
+import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
-import { PrismaService } from '../prisma/prisma.service';
+import { UserRepository } from './user.repository';
 
 @Injectable()
 export class UserService {
-  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
+  constructor(private readonly repository: UserRepository) {}
 
   async getUserByAccountId(accountId: string): Promise<User> {
-    return this.prisma.user.findUnique({
-      where: {
-        accountId,
-      },
-      include: {
-        groupUsers: true,
-      },
+    return this.repository.findOne({
+      accountId,
     });
+  }
+
+  async create(account: EntityData<User>): Promise<User> {
+    return this.repository.create(account);
   }
 }

@@ -6,16 +6,15 @@ import {
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import securityConfig from './config/security.config';
-import { PrismaModule } from './prisma/prisma.module';
 import { EncryptionModule } from './encryption/encryption.module';
-import databaseConfig from './config/database.config';
+import databaseConfig, { DatabaseConfig } from './config/database.config';
 import { AccountModule } from './account/account.module';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
-import { PrismaService } from './prisma/prisma.service';
 import { EncryptionService } from './encryption/encryption.service';
+import { MikroOrmModule } from '@mikro-orm/nestjs';
 
 @Module({
   imports: [
@@ -23,7 +22,15 @@ import { EncryptionService } from './encryption/encryption.service';
       isGlobal: true,
       load: [securityConfig, databaseConfig],
     }),
-    PrismaModule,
+    MikroOrmModule.forRootAsync({
+      useFactory: async (configService: ConfigService) => {
+        return {
+          entities: ['dist/**/*.entity.js'],
+          entitiesTs: ['src/**/*.entity.ts'],
+          ...configService.get<DatabaseConfig>('database'),
+        };
+      },
+    }),
     EncryptionModule,
     UserModule,
     AuthModule,
@@ -38,53 +45,53 @@ async function bootstrap() {
     SeedModule,
     new FastifyAdapter()
   );
-  const prismaService = app.get(PrismaService);
   const encryptionService = app.get(EncryptionService);
 
   Logger.log('Start seeding default user groups');
-  await prismaService.group.createMany({
-    data: [{ name: 'Administrator' }, { name: 'Member', default: true }],
-  });
 
-  Logger.log('Start seeding admin user');
-  const hashedPassword = await encryptionService.hash('super!password');
-  const accountId = v4();
-  await prismaService.$transaction([
-    prismaService.account.create({
-      data: {
-        id: accountId,
-        username: 'admin',
-        email: 'hieutran.fu@gmail.com',
-        firstName: 'Hieu',
-        lastName: 'Tran',
-        password: hashedPassword,
-      },
-    }),
-    prismaService.user.create({
-      data: {
-        accountId,
-      },
-    }),
-  ]);
+  // await prismaService.group.createMany({
+  //   data: [{ name: 'Administrator' }, { name: 'Member', default: true }],
+  // });
 
-  const adminUser = await prismaService.user.findUnique({
-    where: {
-      accountId,
-    },
-  });
+  // Logger.log('Start seeding admin user');
+  // const hashedPassword = await encryptionService.hash('super!password');
+  // const accountId = v4();
+  // await prismaService.$transaction([
+  //   prismaService.account.create({
+  //     data: {
+  //       id: accountId,
+  //       username: 'admin',
+  //       email: 'hieutran.fu@gmail.com',
+  //       firstName: 'Hieu',
+  //       lastName: 'Tran',
+  //       password: hashedPassword,
+  //     },
+  //   }),
+  //   prismaService.user.create({
+  //     data: {
+  //       accountId,
+  //     },
+  //   }),
+  // ]);
 
-  const adminGroup = await prismaService.group.findFirst({
-    where: {
-      name: 'Administrator',
-    },
-  });
+  // const adminUser = await prismaService.user.findUnique({
+  //   where: {
+  //     accountId,
+  //   },
+  // });
 
-  await prismaService.groupUser.create({
-    data: {
-      userId: adminUser.id,
-      groupId: adminGroup.id,
-    },
-  });
+  // const adminGroup = await prismaService.group.findFirst({
+  //   where: {
+  //     name: 'Administrator',
+  //   },
+  // });
+
+  // await prismaService.groupUser.create({
+  //   data: {
+  //     userId: adminUser.id,
+  //     groupId: adminGroup.id,
+  //   },
+  // });
 
   app.close();
 }
